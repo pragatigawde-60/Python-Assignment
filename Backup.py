@@ -2,48 +2,52 @@ import os
 import sys
 import shutil
 from datetime import datetime
-
-def backup_files(src_dir, dest_dir):
-    # Check if source directory exists
-    if not os.path.exists(src_dir):
-        print(f"Error: Source directory '{src_dir}' does not exist.")
+ 
+ 
+def backup_files(source_dir, destination_dir):
+ 
+    if not os.path.isdir(source_dir):
+        print(f"Error: Source directory '{source_dir}' does not exist.")
         return
-
-    # Check if destination directory exists; create if not
-    if not os.path.exists(dest_dir):
-        try:
-            os.makedirs(dest_dir)
-            print(f"Destination directory '{dest_dir}' created.")
-        except Exception as e:
-            print(f"Error creating destination directory: {e}")
-            return
-
-    # Iterate over files in source directory
-    for filename in os.listdir(src_dir):
-        src_file = os.path.join(src_dir, filename)
-        dest_file = os.path.join(dest_dir, filename)
-
-        # Skip directories; only backup files
-        if os.path.isfile(src_file):
-            # If file exists in destination, append timestamp
+ 
+    if not os.path.isdir(destination_dir):
+        print(f"Error: Destination directory '{destination_dir}' does not exist.")
+        return
+ 
+    try:
+ 
+        for filename in os.listdir(source_dir):
+ 
+            source_file = os.path.join(source_dir, filename)
+ 
+            if not os.path.isfile(source_file):
+                continue
+ 
+            dest_file = os.path.join(destination_dir, filename)
+ 
             if os.path.exists(dest_file):
                 base, ext = os.path.splitext(filename)
-                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                dest_file = os.path.join(dest_dir, f"{base}_{timestamp}{ext}")
-
-            try:
-                shutil.copy2(src_file, dest_file)  # copy2 preserves metadata
-                print(f"Backed up '{filename}' -> '{dest_file}'")
-            except Exception as e:
-                print(f"Error copying '{filename}': {e}")
-
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                new_filename = f"{base}_{timestamp}{ext}"
+                dest_file = os.path.join(destination_dir, new_filename)
+                print(f"Duplicate found. Renaming to: {new_filename}")
+ 
+            shutil.copy2(source_file, dest_file)
+            print(f"Backed up: {filename}")
+ 
+        print("\nBackup completed successfully!")
+ 
+    except Exception as e:
+        print(f"An error occurred during backup: {e}")
+ 
+ 
 if __name__ == "__main__":
-    # Check command-line arguments
+   
     if len(sys.argv) != 3:
-        print("Usage: python backup.py C:/Users/p.satyavan.gawde/Documents C:/Users/p.satyavan.gawde/Favorites")
+        print("Usage: python backup.py <source_directory> <destination_directory>")
         sys.exit(1)
-
-    source_dir = sys.argv[1]
-    destination_dir = sys.argv[2]
-
-    backup_files(source_dir, destination_dir)
+ 
+    source = sys.argv[1]
+    destination = sys.argv[2]
+ 
+    backup_files(source, destination)
